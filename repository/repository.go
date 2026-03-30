@@ -10,7 +10,7 @@ import (
 )
 
 func AddUser(user models.User, hashedPassword string) error {
-	_, err := database.DB.Exec("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", user.Name, user.Email, hashedPassword)
+	_, err := database.DB.Exec("INSERT INTO users (name, email, password) VALUES ($1, $2, $3);", user.Name, user.Email, hashedPassword)
 	if err != nil {
 		log.Println(err)
 
@@ -24,7 +24,7 @@ func AddUser(user models.User, hashedPassword string) error {
 }
 
 func DeleteUser(email string) error {
-	_, err := database.DB.Exec("DELETE FROM users WHERE email = ?", email)
+	_, err := database.DB.Exec("DELETE FROM users WHERE email = $1;", email)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -34,7 +34,7 @@ func DeleteUser(email string) error {
 
 func FindUserByEmail(email string) (models.User, error) {
 	var user models.User
-	err := database.DB.QueryRow("SELECT id, name, email, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	err := database.DB.QueryRow("SELECT id, name, email, password FROM users WHERE email = $1;", email).Scan(&user.ID, &user.Name, &user.Email, &user.Password)
 	if err != nil {
 		log.Println(err)
 
@@ -48,7 +48,7 @@ func FindUserByEmail(email string) (models.User, error) {
 }
 
 func AddTask(task models.Task, user_id float64) error {
-	_, err := database.DB.Exec("INSERT INTO tasks (task_name, user_id) VALUES (?, ?)", task.TaskName, user_id)
+	_, err := database.DB.Exec("INSERT INTO tasks (task_name, user_id) VALUES ($1, $2);", task.TaskName, user_id)
 	if err != nil {
 		log.Println(err)
 		return errors.New("DATABASE_ERROR")
@@ -57,7 +57,7 @@ func AddTask(task models.Task, user_id float64) error {
 }
 
 func DeleteAllTasks(user_id float64) error {
-	_, err := database.DB.Exec("DELETE FROM tasks WHERE user_id = ?", user_id)
+	_, err := database.DB.Exec("DELETE FROM tasks WHERE user_id = $1;", user_id)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -66,7 +66,7 @@ func DeleteAllTasks(user_id float64) error {
 }
 
 func DeleteTask(task_id int, user_id float64) error {
-	_, err := database.DB.Exec("DELETE FROM tasks WHERE id = ? AND user_id = ?", task_id, user_id)
+	_, err := database.DB.Exec("DELETE FROM tasks WHERE id = $1 AND user_id = $2;", task_id, user_id)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -75,7 +75,7 @@ func DeleteTask(task_id int, user_id float64) error {
 }
 
 func GetAllTasks(user_id float64) ([]models.Task, error) {
-	rows, err := database.DB.Query("SELECT id, task_name, create_at FROM tasks WHERE user_id = ?", user_id)
+	rows, err := database.DB.Query("SELECT id, task_name, create_at FROM tasks WHERE user_id = $1;", user_id)
 	if err != nil {
 		log.Println(err)
 		return []models.Task{}, err
@@ -95,7 +95,7 @@ func GetAllTasks(user_id float64) ([]models.Task, error) {
 }
 
 func UpdateTask(new_task_name string, task_id int, user_id float64) error {
-	_, err := database.DB.Exec("UPDATE tasks SET task_name = ? WHERE id = ? AND user_id = ?", new_task_name, task_id, user_id)
+	_, err := database.DB.Exec("UPDATE tasks SET task_name = $1 WHERE id = $2 AND user_id = $3;", new_task_name, task_id, user_id)
 	if err != nil {
 		log.Println(err)
 		return err
