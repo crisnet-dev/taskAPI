@@ -1,4 +1,6 @@
 *.db
 *.exe
 
-tokens.txt
+*txt
+
+/bin

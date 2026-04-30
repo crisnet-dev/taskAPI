@@ -2,23 +2,42 @@ package utils
 
 import (
 	"errors"
+	"os"
+	"time"
 
-	"github.com/crisnet-dev/models"
+	"github.com/crisnet-dev/task-api/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var SECRET_KEY = []byte("MY@_keY")
+var SECRET_KEY = []byte(os.Getenv("SECRET_KEY"))
 
-func GenerateToken(user models.User) (string, error) {
+func GenerateToken(user models.User) (string, string, error) {
 	claims := jwt.MapClaims{
-		"subject": user.ID,
-		"email":   user.Email,
-		"name":    user.Name,
+		"sub":   user.ID,
+		"email": user.Email,
+		"name":  user.Name,
+		"exp":   time.Now().Add(time.Duration(5) * time.Minute).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(SECRET_KEY)
+	tokenString, err := token.SignedString(SECRET_KEY)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshTokenClaims := jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Duration(5) * time.Minute).Unix(),
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
+	refreshTokenString, err := refreshToken.SignedString(SECRET_KEY)
+	if err != nil {
+		return "", "", err
+	}
+
+	return tokenString, refreshTokenString, nil
 }
 
 // ?

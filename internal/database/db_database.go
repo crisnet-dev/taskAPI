@@ -28,10 +28,15 @@ func ConfigDB() error {
 			task_name TEXT NOT NULL,
 			create_at DATE DEFAULT CURRENT_TIMESTAMP
 		);
-	`)
+		`)
 	if err != nil {
 		return err
 	}
+
+	// _, err = db.Exec("ALTER TABLE users ADD COLUMN refreshToken TEXT;")
+	// if err != nil {
+	// 	return err
+	// }
 
 	DB = db
 

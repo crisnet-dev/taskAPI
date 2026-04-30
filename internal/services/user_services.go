@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/crisnet-dev/models"
-	"github.com/crisnet-dev/repository"
+	"github.com/crisnet-dev/task-api/internal/models"
+	"github.com/crisnet-dev/task-api/internal/repository"
 )
 
 func DeleteAccountService(email string) error {
@@ -24,7 +24,9 @@ func ProfileService(email string) (models.User, int, error) {
 	if err != nil {
 		return models.User{}, 0, err
 	}
-	return userFounded, 0, nil
+
+	total_tasks, err := repository.GetTotalTasks(userFounded.ID)
+	return userFounded, total_tasks, nil
 }
 
 func AddTaskService(task models.Task, user_id float64) error {

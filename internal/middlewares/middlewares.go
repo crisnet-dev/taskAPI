@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/crisnet-dev/utils"
+	"github.com/crisnet-dev/task-api/utils"
 )
 
 func SetCORS(next http.Handler) http.Handler {
@@ -30,7 +30,7 @@ func VerifyToken(next http.HandlerFunc) http.HandlerFunc {
 		authorization = strings.TrimSpace(authorization)
 
 		if authorization == "" {
-			utils.HttpError(w, "Missing token", http.StatusBadRequest)
+			utils.HttpError(w, "Missing token", http.StatusUnauthorized)
 			return
 		}
 
@@ -45,13 +45,19 @@ func VerifyToken(next http.HandlerFunc) http.HandlerFunc {
 		claims, err := utils.ValidateToken(token)
 		if err != nil {
 			log.Println(err)
-			utils.HttpError(w, err.Error(), http.StatusBadRequest)
+
+			if strings.Contains(strings.ToUpper(err.Error()), "EXPIRED") {
+				utils.HttpError(w, "Access token is expired", http.StatusUnauthorized)
+				return
+			}
+
+			utils.HttpError(w, "Invalid access token", http.StatusUnauthorized)
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), "email", claims["email"])
 		ctx = context.WithValue(ctx, "name", claims["name"])
-		ctx = context.WithValue(ctx, "user_id", claims["subject"])
+		ctx = context.WithValue(ctx, "user_id", claims["sub"])
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}

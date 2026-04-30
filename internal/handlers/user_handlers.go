@@ -1,15 +1,21 @@
-package routes
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/crisnet-dev/models"
-	"github.com/crisnet-dev/services"
-	"github.com/crisnet-dev/utils"
+	"github.com/crisnet-dev/task-api/internal/models"
+	"github.com/crisnet-dev/task-api/internal/services"
+	"github.com/crisnet-dev/task-api/utils"
 )
 
-func ProfileRouter(w http.ResponseWriter, r *http.Request) {
+type UserHandler struct{}
+
+func NewUserHandler() *UserHandler {
+	return &UserHandler{}
+}
+
+func (handler *UserHandler) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	email := r.Context().Value("email").(string)
@@ -32,7 +38,7 @@ func ProfileRouter(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func DeleteAccountRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	email := r.Context().Value("email").(string)
@@ -52,7 +58,7 @@ func DeleteAccountRouter(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func AddTaskRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) AddTaskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var task models.Task
@@ -81,11 +87,11 @@ func AddTaskRouter(w http.ResponseWriter, r *http.Request) {
 		map[string]any{
 			"message": "Task created",
 		},
-		http.StatusOK,
+		http.StatusCreated,
 	)
 }
 
-func GetAllTasksRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	user_id := r.Context().Value("user_id").(float64)
@@ -105,7 +111,7 @@ func GetAllTasksRouter(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func DeleteTaskRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	task_id := r.PathValue("id")
@@ -126,7 +132,7 @@ func DeleteTaskRouter(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func DeleteAllTasksRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	user_id := r.Context().Value("user_id").(float64)
@@ -146,7 +152,7 @@ func DeleteAllTasksRouter(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func UpdateTaskRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *UserHandler) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var task models.Task

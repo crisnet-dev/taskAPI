@@ -1,16 +1,22 @@
-package routes
+package handlers
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 
-	"github.com/crisnet-dev/models"
-	"github.com/crisnet-dev/services"
-	"github.com/crisnet-dev/utils"
+	"github.com/crisnet-dev/task-api/internal/models"
+	"github.com/crisnet-dev/task-api/internal/services"
+	"github.com/crisnet-dev/task-api/utils"
 )
 
-func SignupRouter(w http.ResponseWriter, r *http.Request) {
+type AuthHandler struct{}
+
+func NewAuthHandler() *AuthHandler {
+	return &AuthHandler{}
+}
+
+func (handler *AuthHandler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var user models.User
@@ -40,11 +46,11 @@ func SignupRouter(w http.ResponseWriter, r *http.Request) {
 		map[string]any{
 			"message": "User created",
 		},
-		http.StatusOK,
+		http.StatusCreated,
 	)
 }
 
-func LoginRouter(w http.ResponseWriter, r *http.Request) {
+func (handler *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var user models.User
@@ -56,7 +62,7 @@ func LoginRouter(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	token, err := services.LoginService(user)
+	accessToken, refreshToken, err := services.LoginService(user)
 	if err != nil {
 		switch err.Error() {
 		case "M_C":
@@ -74,9 +80,37 @@ func LoginRouter(w http.ResponseWriter, r *http.Request) {
 	utils.HttpResponse(
 		w,
 		map[string]any{
-			"message": "Logged",
-			"token":   token,
+			"access_token":  accessToken,
+			"refresh_token": refreshToken,
 		},
 		http.StatusOK,
 	)
+}
+
+func (handler *AuthHandler) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var refreshToken models.RefreshToken
+
+	if err := json.NewDecoder(r.Body).Decode(&refreshToken); err != nil {
+		utils.HttpError(w, "Invalid JSON", 400)
+		return
+	}
+	defer r.Body.Close()
+
+	accessTokenString, refreshTokenString, err := services.RefreshTokenService(refreshToken.RefreshToken)
+	if err != nil {
+		utils.HttpError(w, err.Error(), 400)
+		return
+	}
+
+	utils.HttpResponse(
+		w,
+		map[string]any{
+			"access_token":  accessTokenString,
+			"refresh_token": refreshTokenString,
+		},
+		http.StatusOK,
+	)
+
 }
