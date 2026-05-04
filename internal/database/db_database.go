@@ -3,13 +3,20 @@ package database
 import (
 	"database/sql"
 
+	"github.com/crisnet-dev/task-api/internal/config"
 	_ "github.com/lib/pq"
 )
 
 var DB *sql.DB
 
 func ConfigDB() error {
-	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=5432 dbname=taskSystem sslmode=disable")
+
+	env := config.GetEnv()
+	var url string = "host=" + env.DatabaseHost + " port=" + env.DatabasePort + " user=" + env.DatabaseUserName + " password=" + env.DatabasePort + " dbname=" + env.DatabaseTableName + " sslmode=disable"
+
+	// const url str= "host=localhost port=5432 user=postgres password=5432 dbname=taskSystem sslmode=disable"
+
+	db, err := sql.Open("postgres", url)
 	if err != nil {
 		return err
 	}

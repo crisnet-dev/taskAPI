@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/crisnet-dev/task-api/utils"
+	"github.com/crisnet-dev/task-api/internal/config"
+	"github.com/crisnet-dev/task-api/internal/utils"
 )
 
 func SetCORS(next http.Handler) http.Handler {
@@ -47,11 +48,19 @@ func VerifyToken(next http.HandlerFunc) http.HandlerFunc {
 			log.Println(err)
 
 			if strings.Contains(strings.ToUpper(err.Error()), "EXPIRED") {
-				utils.HttpError(w, "Access token is expired", http.StatusUnauthorized)
+				utils.HttpError(w, "Token is expired", http.StatusUnauthorized)
 				return
 			}
 
-			utils.HttpError(w, "Invalid access token", http.StatusUnauthorized)
+			utils.HttpError(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		tokenType := claims["type"].(string)
+		issuer := claims["iss"].(string)
+
+		if tokenType != "access" || issuer != config.GetEnv().Issuer {
+			utils.HttpError(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 

@@ -10,17 +10,19 @@ import (
 )
 
 func main() {
-	err := database.ConfigDB()
-	if err != nil {
+	if err := config.LoadConfig(); err != nil {
+		log.Fatal("Error loading .env file.")
+	}
+	env := config.GetEnv()
+
+	if err := database.ConfigDB(); err != nil {
 		log.Fatal(err)
 	}
 
-	r := routes.SetUpRoutes()
-
-	env := config.GetEnv()
+	routes := routes.SetUpRoutes()
 
 	log.Printf("The server is running in: http://%s:%s\n", env.Host, env.Port)
-	if err := http.ListenAndServe(env.Host+":"+env.Port, r); err != nil {
+	if err := http.ListenAndServe(env.Host+":"+env.Port, routes); err != nil {
 		log.Fatal(err)
 	}
 }

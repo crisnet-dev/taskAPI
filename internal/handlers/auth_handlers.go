@@ -7,7 +7,7 @@ import (
 
 	"github.com/crisnet-dev/task-api/internal/models"
 	"github.com/crisnet-dev/task-api/internal/services"
-	"github.com/crisnet-dev/task-api/utils"
+	"github.com/crisnet-dev/task-api/internal/utils"
 )
 
 type AuthHandler struct{}
@@ -100,7 +100,7 @@ func (handler *AuthHandler) RefreshTokenHandler(w http.ResponseWriter, r *http.R
 
 	accessTokenString, refreshTokenString, err := services.RefreshTokenService(refreshToken.RefreshToken)
 	if err != nil {
-		utils.HttpError(w, err.Error(), 400)
+		utils.HttpError(w, err.Error(), 401)
 		return
 	}
 

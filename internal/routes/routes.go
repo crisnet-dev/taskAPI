@@ -7,6 +7,7 @@ func SetUpRoutes() http.Handler {
 
 	RegisterAuthRoutes(mux)
 	RegisterUserRoutes(mux)
+	RegisterTaskRoutes(mux)
 
 	return mux
 }

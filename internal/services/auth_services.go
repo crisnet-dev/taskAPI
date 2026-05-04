@@ -5,9 +5,10 @@ import (
 	"log"
 	"strings"
 
+	"github.com/crisnet-dev/task-api/internal/config"
 	"github.com/crisnet-dev/task-api/internal/models"
 	"github.com/crisnet-dev/task-api/internal/repository"
-	"github.com/crisnet-dev/task-api/utils"
+	"github.com/crisnet-dev/task-api/internal/utils"
 )
 
 func LoginService(user models.User) (string, string, error) {
@@ -69,6 +70,12 @@ func RefreshTokenService(refreshToken string) (string, string, error) {
 	}
 
 	user_id := claims["sub"].(float64)
+	issuer := claims["iss"].(string)
+	tokenType := claims["type"].(string)
+
+	if tokenType != "refresh" && issuer != config.GetEnv().Issuer {
+		return "", "", errors.New("Invalid refresh token")
+	}
 
 	_, err = repository.WhereRefreshToken(int(user_id)) // "refreshTokenFounded" Alert!!!!
 	if err != nil {

@@ -2,37 +2,43 @@ package utils
 
 import (
 	"errors"
-	"os"
 	"time"
 
+	"github.com/crisnet-dev/task-api/internal/config"
 	"github.com/crisnet-dev/task-api/internal/models"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var SECRET_KEY = []byte(os.Getenv("SECRET_KEY"))
-
 func GenerateToken(user models.User) (string, string, error) {
+
+	var env = config.GetEnv()
+	var SecretKey = []byte(env.SecretKey)
+
 	claims := jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,
 		"name":  user.Name,
+		"iss":   env.Issuer,
+		"type":  "access",
 		"exp":   time.Now().Add(time.Duration(5) * time.Minute).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(SECRET_KEY)
+	tokenString, err := token.SignedString(SecretKey)
 	if err != nil {
 		return "", "", err
 	}
 
 	refreshTokenClaims := jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Duration(5) * time.Minute).Unix(),
+		"sub":  user.ID,
+		"iss":  env.Issuer,
+		"type": "refresh",
+		"exp":  time.Now().Add(time.Duration(5) * time.Minute).Unix(),
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
-	refreshTokenString, err := refreshToken.SignedString(SECRET_KEY)
+	refreshTokenString, err := refreshToken.SignedString(SecretKey)
 	if err != nil {
 		return "", "", err
 	}
@@ -42,11 +48,14 @@ func GenerateToken(user models.User) (string, string, error) {
 
 // ?
 func ValidateToken(tokenString string) (jwt.MapClaims, error) {
+	var env = config.GetEnv()
+	var SecretKey = []byte(env.SecretKey)
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("INVALID_METHOD")
 		}
-		return SECRET_KEY, nil
+		return SecretKey, nil
 	})
 
 	if err != nil {
