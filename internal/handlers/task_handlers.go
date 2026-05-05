@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/crisnet-dev/task-api/internal/models"
@@ -73,6 +74,8 @@ func (handler *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Req
 
 	task_id := r.PathValue("id")
 	user_id := r.Context().Value("user_id").(float64)
+
+	log.Println(task_id)
 
 	err := services.DeleteTaskService(task_id, user_id)
 	if err != nil {

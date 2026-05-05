@@ -1,13 +1,15 @@
 package routes
 
-import "net/http"
+import "github.com/gorilla/mux"
 
-func SetUpRoutes() http.Handler {
-	mux := http.NewServeMux()
+func SetUpRoutes() *mux.Router {
+	mux := mux.NewRouter()
 
-	RegisterAuthRoutes(mux)
-	RegisterUserRoutes(mux)
-	RegisterTaskRoutes(mux)
+	r := mux.PathPrefix("/api").Subrouter()
+
+	RegisterAuthRoutes(r)
+	RegisterUserRoutes(r)
+	RegisterTaskRoutes(r)
 
 	return mux
 }

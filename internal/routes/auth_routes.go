@@ -1,17 +1,16 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/crisnet-dev/task-api/internal/handlers"
+	"github.com/gorilla/mux"
 )
 
-func RegisterAuthRoutes(mux *http.ServeMux) {
+func RegisterAuthRoutes(mux *mux.Router) {
 
 	authHandlers := handlers.NewAuthHandler()
 
-	mux.HandleFunc("POST /api/auth/login", authHandlers.LoginHandler)
-	mux.HandleFunc("POST /api/auth/signup", authHandlers.RegisterHandler)
-	mux.HandleFunc("POST /api/auth/refresh", authHandlers.RefreshTokenHandler)
+	mux.HandleFunc("/auth/login", authHandlers.LoginHandler).Methods("POST")
+	mux.HandleFunc("/auth/signup", authHandlers.RegisterHandler).Methods("POST")
+	mux.HandleFunc("/auth/refresh", authHandlers.RefreshTokenHandler).Methods("POST")
 
 }

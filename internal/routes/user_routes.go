@@ -1,17 +1,16 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/crisnet-dev/task-api/internal/handlers"
 	"github.com/crisnet-dev/task-api/internal/middlewares"
+	"github.com/gorilla/mux"
 )
 
-func RegisterUserRoutes(mux *http.ServeMux) {
+func RegisterUserRoutes(mux *mux.Router) {
 
 	handlers := handlers.NewUserHandler()
 
-	mux.HandleFunc("GET /api/user", middlewares.VerifyToken(handlers.ProfileHandler))
-	mux.HandleFunc("DELETE /api/user/delete", middlewares.VerifyToken(handlers.DeleteAccountHandler))
+	mux.HandleFunc("/user", middlewares.VerifyToken(handlers.ProfileHandler)).Methods("GET")
+	mux.HandleFunc("/user/delete", middlewares.VerifyToken(handlers.DeleteAccountHandler)).Methods("DELETE")
 
 }

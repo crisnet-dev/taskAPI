@@ -8,3 +8,5 @@ require (
 	github.com/lib/pq v1.12.2
 	golang.org/x/crypto v0.46.0
 )
+
+require github.com/gorilla/mux v1.8.1

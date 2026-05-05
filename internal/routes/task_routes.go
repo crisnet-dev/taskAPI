@@ -1,20 +1,19 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/crisnet-dev/task-api/internal/handlers"
 	"github.com/crisnet-dev/task-api/internal/middlewares"
+	"github.com/gorilla/mux"
 )
 
-func RegisterTaskRoutes(mux *http.ServeMux) {
+func RegisterTaskRoutes(mux *mux.Router) {
 
 	handlers := handlers.NewTaskHandler()
 
-	mux.HandleFunc("GET /api/user/task", middlewares.VerifyToken(handlers.GetAllTasksHandler))
-	mux.HandleFunc("POST /api/user/task", middlewares.VerifyToken(handlers.AddTaskHandler))
-	mux.HandleFunc("DELETE /api/user/task/{id}", middlewares.VerifyToken(handlers.DeleteTaskHandler))
-	mux.HandleFunc("DELETE /api/user/task", middlewares.VerifyToken(handlers.DeleteAllTasksHandler))
-	mux.HandleFunc("PUT /api/user/task/{id}", middlewares.VerifyToken(handlers.UpdateTaskHandler))
+	mux.HandleFunc("/user/task", middlewares.VerifyToken(handlers.GetAllTasksHandler)).Methods("GET")
+	mux.HandleFunc("/user/task", middlewares.VerifyToken(handlers.AddTaskHandler)).Methods("POST")
+	mux.HandleFunc("/user/task/{id}", middlewares.VerifyToken(handlers.DeleteTaskHandler)).Methods("DELETE")
+	mux.HandleFunc("/user/task", middlewares.VerifyToken(handlers.DeleteAllTasksHandler)).Methods("DELETE")
+	mux.HandleFunc("/user/task/{id}", middlewares.VerifyToken(handlers.UpdateTaskHandler)).Methods("PUT")
 
 }
