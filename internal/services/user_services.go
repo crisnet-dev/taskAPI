@@ -29,7 +29,7 @@ func ProfileService(email string) (models.User, int, error) {
 	return userFounded, total_tasks, nil
 }
 
-func AddTaskService(task models.Task, user_id float64) error {
+func AddTaskService(task models.Task, user_id int) error {
 	if strings.TrimSpace(task.TaskName) == "" {
 		return errors.New("M_C")
 	}
@@ -38,7 +38,7 @@ func AddTaskService(task models.Task, user_id float64) error {
 	return nil
 }
 
-func GetAllTaskService(user_id float64) ([]models.Task, error) {
+func GetAllTaskService(user_id int) ([]models.Task, error) {
 	tasks, err := repository.GetAllTasks(user_id)
 	if err != nil {
 		return []models.Task{}, err
@@ -46,14 +46,14 @@ func GetAllTaskService(user_id float64) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func DeleteAllTasksService(user_id float64) error {
+func DeleteAllTasksService(user_id int) error {
 	if err := repository.DeleteAllTasks(user_id); err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteTaskService(task_id string, user_id float64) error {
+func DeleteTaskService(task_id string, user_id int) error {
 	task_id_int, err := strconv.Atoi(task_id)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func DeleteTaskService(task_id string, user_id float64) error {
 	return nil
 }
 
-func UpdateTaskService(new_task_name string, task_id string, user_id float64) error {
+func UpdateTaskService(new_task_name string, task_id string, user_id int) error {
 	task_id_int, err := strconv.Atoi(task_id)
 	if err != nil {
 		return err

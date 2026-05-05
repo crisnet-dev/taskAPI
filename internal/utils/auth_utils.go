@@ -2,6 +2,8 @@ package utils
 
 import (
 	"errors"
+	"strconv"
+
 	"time"
 
 	"github.com/crisnet-dev/task-api/internal/config"
@@ -15,13 +17,16 @@ func GenerateToken(user models.User) (string, string, error) {
 	var env = config.GetEnv()
 	var SecretKey = []byte(env.SecretKey)
 
-	claims := jwt.MapClaims{
-		"sub":   user.ID,
-		"email": user.Email,
-		"name":  user.Name,
-		"iss":   env.Issuer,
-		"type":  "access",
-		"exp":   time.Now().Add(time.Duration(5) * time.Minute).Unix(),
+	claims := models.Claims{
+		Email: user.Email,
+		Name:  user.Name,
+		Type:  "access",
+
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    env.Issuer,
+			Subject:   strconv.Itoa(int(user.ID)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(5) * time.Minute)),
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -30,11 +35,13 @@ func GenerateToken(user models.User) (string, string, error) {
 		return "", "", err
 	}
 
-	refreshTokenClaims := jwt.MapClaims{
-		"sub":  user.ID,
-		"iss":  env.Issuer,
-		"type": "refresh",
-		"exp":  time.Now().Add(time.Duration(5) * time.Minute).Unix(),
+	refreshTokenClaims := models.Claims{
+		Type: "refresh",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   strconv.Itoa(int(user.ID)),
+			Issuer:    env.Issuer,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(15) * time.Minute)),
+		},
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
@@ -46,12 +53,11 @@ func GenerateToken(user models.User) (string, string, error) {
 	return tokenString, refreshTokenString, nil
 }
 
-// ?
-func ValidateToken(tokenString string) (jwt.MapClaims, error) {
+func ValidateToken(tokenString string) (*models.Claims, error) {
 	var env = config.GetEnv()
 	var SecretKey = []byte(env.SecretKey)
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &models.Claims{}, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("INVALID_METHOD")
 		}
@@ -62,7 +68,7 @@ func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(*models.Claims); ok && token.Valid {
 		return claims, nil
 	}
 

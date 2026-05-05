@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/crisnet-dev/task-api/internal/config"
@@ -69,9 +70,14 @@ func RefreshTokenService(refreshToken string) (string, string, error) {
 		return "", "", errors.New("Invalid refresh token")
 	}
 
-	user_id := claims["sub"].(float64)
-	issuer := claims["iss"].(string)
-	tokenType := claims["type"].(string)
+	user_id_string := claims.Subject
+	issuer := claims.Issuer
+	tokenType := claims.Type
+
+	user_id, err := strconv.Atoi(user_id_string)
+	if err != nil {
+		return "", "", err
+	}
 
 	if tokenType != "refresh" && issuer != config.GetEnv().Issuer {
 		return "", "", errors.New("Invalid refresh token")

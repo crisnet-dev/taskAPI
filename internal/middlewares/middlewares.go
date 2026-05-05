@@ -25,8 +25,8 @@ func SetCORS(next http.Handler) http.Handler {
 	})
 }
 
-func VerifyToken(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func VerifyToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authorization := r.Header.Get("Authorization")
 		authorization = strings.TrimSpace(authorization)
 
@@ -56,18 +56,15 @@ func VerifyToken(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		tokenType := claims["type"].(string)
-		issuer := claims["iss"].(string)
-
-		if tokenType != "access" || issuer != config.GetEnv().Issuer {
+		if claims.Type != "access" || claims.Issuer != config.GetEnv().Issuer {
 			utils.HttpError(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "email", claims["email"])
-		ctx = context.WithValue(ctx, "name", claims["name"])
-		ctx = context.WithValue(ctx, "user_id", claims["sub"])
+		ctx := context.WithValue(r.Context(), "email", claims.Email)
+		ctx = context.WithValue(ctx, "name", claims.Name)
+		ctx = context.WithValue(ctx, "user_id", claims.Subject)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
-	}
+	})
 }

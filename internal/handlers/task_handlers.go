@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/crisnet-dev/task-api/internal/models"
 	"github.com/crisnet-dev/task-api/internal/services"
 	"github.com/crisnet-dev/task-api/internal/utils"
+	"github.com/gorilla/mux"
 )
 
 type TaskHandler struct{}
@@ -27,9 +28,14 @@ func (handler *TaskHandler) AddTaskHandler(w http.ResponseWriter, r *http.Reques
 	}
 	defer r.Body.Close()
 
-	user_id := r.Context().Value("user_id").(float64)
+	user_id_string := r.Context().Value("user_id").(string)
+	user_id, err := strconv.Atoi(user_id_string)
+	if err != nil {
+		utils.HttpError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	err := services.AddTaskService(task, user_id)
+	err = services.AddTaskService(task, user_id)
 	if err != nil {
 		if err.Error() == "M_C" {
 			utils.HttpError(w, "Missing credentials", http.StatusBadRequest)
@@ -52,7 +58,12 @@ func (handler *TaskHandler) AddTaskHandler(w http.ResponseWriter, r *http.Reques
 func (handler *TaskHandler) GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	user_id := r.Context().Value("user_id").(float64)
+	user_id_string := r.Context().Value("user_id").(string)
+	user_id, err := strconv.Atoi(user_id_string)
+	if err != nil {
+		utils.HttpError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	tasks, err := services.GetAllTaskService(user_id)
 	if err != nil {
@@ -72,12 +83,17 @@ func (handler *TaskHandler) GetAllTasksHandler(w http.ResponseWriter, r *http.Re
 func (handler *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	task_id := r.PathValue("id")
-	user_id := r.Context().Value("user_id").(float64)
+	vars := mux.Vars(r)
 
-	log.Println(task_id)
+	task_id := vars["id"]
+	user_id_string := r.Context().Value("user_id").(string)
+	user_id, err := strconv.Atoi(user_id_string)
+	if err != nil {
+		utils.HttpError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	err := services.DeleteTaskService(task_id, user_id)
+	err = services.DeleteTaskService(task_id, user_id)
 	if err != nil {
 		utils.HttpError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -95,9 +111,14 @@ func (handler *TaskHandler) DeleteTaskHandler(w http.ResponseWriter, r *http.Req
 func (handler *TaskHandler) DeleteAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	user_id := r.Context().Value("user_id").(float64)
+	user_id_string := r.Context().Value("user_id").(string)
+	user_id, err := strconv.Atoi(user_id_string)
+	if err != nil {
+		utils.HttpError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	err := services.DeleteAllTasksService(user_id)
+	err = services.DeleteAllTasksService(user_id)
 	if err != nil {
 		utils.HttpError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -121,10 +142,17 @@ func (handler *TaskHandler) UpdateTaskHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	task_id := r.PathValue("id")
-	user_id := r.Context().Value("user_id").(float64)
+	vars := mux.Vars(r)
 
-	err := services.UpdateTaskService(task.TaskName, task_id, user_id)
+	task_id := vars["id"]
+	user_id_string := r.Context().Value("user_id").(string)
+	user_id, err := strconv.Atoi(user_id_string)
+	if err != nil {
+		utils.HttpError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = services.UpdateTaskService(task.TaskName, task_id, user_id)
 	if err != nil {
 		utils.HttpError(w, err.Error(), http.StatusInternalServerError)
 		return

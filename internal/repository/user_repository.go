@@ -62,7 +62,7 @@ func FindUserByID(user_id int) (models.User, error) {
 	return user, nil
 }
 
-func AddTask(task models.Task, user_id float64) error {
+func AddTask(task models.Task, user_id int) error {
 	_, err := database.DB.Exec("INSERT INTO tasks (task_name, user_id) VALUES ($1, $2);", task.TaskName, user_id)
 	if err != nil {
 		log.Println(err)
@@ -71,7 +71,7 @@ func AddTask(task models.Task, user_id float64) error {
 	return nil
 }
 
-func DeleteAllTasks(user_id float64) error {
+func DeleteAllTasks(user_id int) error {
 	_, err := database.DB.Exec("DELETE FROM tasks WHERE user_id = $1;", user_id)
 	if err != nil {
 		log.Println(err)
@@ -80,7 +80,7 @@ func DeleteAllTasks(user_id float64) error {
 	return nil
 }
 
-func DeleteTask(task_id int, user_id float64) error {
+func DeleteTask(task_id int, user_id int) error {
 	_, err := database.DB.Exec("DELETE FROM tasks WHERE id = $1 AND user_id = $2;", task_id, user_id)
 	if err != nil {
 		log.Println(err)
@@ -100,7 +100,7 @@ func GetTotalTasks(user_id int) (int, error) {
 	return totalTasks, nil
 }
 
-func GetAllTasks(user_id float64) ([]models.Task, error) {
+func GetAllTasks(user_id int) ([]models.Task, error) {
 	rows, err := database.DB.Query("SELECT id, task_name, create_at FROM tasks WHERE user_id = $1;", user_id)
 	if err != nil {
 		log.Println(err)
@@ -120,7 +120,7 @@ func GetAllTasks(user_id float64) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func UpdateTask(new_task_name string, task_id int, user_id float64) error {
+func UpdateTask(new_task_name string, task_id int, user_id int) error {
 	_, err := database.DB.Exec("UPDATE tasks SET task_name = $1 WHERE id = $2 AND user_id = $3;", new_task_name, task_id, user_id)
 	if err != nil {
 		log.Println(err)

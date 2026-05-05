@@ -10,10 +10,14 @@ func RegisterTaskRoutes(mux *mux.Router) {
 
 	handlers := handlers.NewTaskHandler()
 
-	mux.HandleFunc("/user/task", middlewares.VerifyToken(handlers.GetAllTasksHandler)).Methods("GET")
-	mux.HandleFunc("/user/task", middlewares.VerifyToken(handlers.AddTaskHandler)).Methods("POST")
-	mux.HandleFunc("/user/task/{id}", middlewares.VerifyToken(handlers.DeleteTaskHandler)).Methods("DELETE")
-	mux.HandleFunc("/user/task", middlewares.VerifyToken(handlers.DeleteAllTasksHandler)).Methods("DELETE")
-	mux.HandleFunc("/user/task/{id}", middlewares.VerifyToken(handlers.UpdateTaskHandler)).Methods("PUT")
+	protected := mux.PathPrefix("/user/task").Subrouter()
+
+	protected.Use(middlewares.VerifyToken)
+
+	protected.HandleFunc("/", handlers.GetAllTasksHandler).Methods("GET")
+	protected.HandleFunc("/", handlers.AddTaskHandler).Methods("POST")
+	protected.HandleFunc("/{id}", handlers.DeleteTaskHandler).Methods("DELETE")
+	protected.HandleFunc("/", handlers.DeleteAllTasksHandler).Methods("DELETE")
+	protected.HandleFunc("/{id}", handlers.UpdateTaskHandler).Methods("PUT")
 
 }

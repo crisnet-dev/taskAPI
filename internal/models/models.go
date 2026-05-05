@@ -1,5 +1,7 @@
 package models
 
+import "github.com/golang-jwt/jwt/v5"
+
 type User struct {
 	ID         int    `json:"id"`
 	Name       string `json:"name"`
@@ -16,4 +18,11 @@ type Task struct {
 
 type RefreshToken struct {
 	RefreshToken string `json:"refresh_token"`
+}
+
+type Claims struct {
+	Email string `json:"email,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Type  string `json:"type,omitempty"`
+	jwt.RegisteredClaims
 }

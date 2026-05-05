@@ -10,7 +10,11 @@ func RegisterUserRoutes(mux *mux.Router) {
 
 	handlers := handlers.NewUserHandler()
 
-	mux.HandleFunc("/user", middlewares.VerifyToken(handlers.ProfileHandler)).Methods("GET")
-	mux.HandleFunc("/user/delete", middlewares.VerifyToken(handlers.DeleteAccountHandler)).Methods("DELETE")
+	protected := mux.PathPrefix("/user").Subrouter()
+
+	protected.Use(middlewares.VerifyToken)
+
+	protected.HandleFunc("/", handlers.ProfileHandler).Methods("GET")
+	protected.HandleFunc("/delete", handlers.DeleteAccountHandler).Methods("DELETE")
 
 }
